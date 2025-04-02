@@ -1,6 +1,18 @@
-print("Hello world!")
+#Some name
+#For now, Tram dilemma
 
-a = 34
-b = 2.5 * a
-c = b%a
-print(c)
+class People():
+    def __init__(self):
+        pass
+    def death(self):
+        pass
+
+class Volunteer(People):
+    pass
+
+class Passenger(People):
+    pass
+
+class Tram():
+    def __init__(self):
+        pass
