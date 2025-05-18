@@ -3,6 +3,8 @@
 
 import threading
 import time
+from dataclasses import dataclass
+from typing import Dict
 
 class People():
     def __init__(self):
@@ -21,14 +23,21 @@ class Tram():
         pass
 
 class Problem():
-    def __init__(self, name, tr_left, tr_right, description=None, time = 10):
+    registry: Dict[str, "Problem"] = {}
+
+    def __init__(self, name, levelID, tr_left, tr_right, description=None, time = 10):
         self.name = name
+        self.levelID = str(levelID)
         self.tr_left = tr_left
         self.tr_right = tr_right
         self.description = description
         self.time = time
         self._timer = None
         self._choice = None
+
+        if self.levelID in Problem.registry:
+            raise ValueError("Duplicate levelID", self.levelID)
+        Problem.registry[self.levelID] = self
 
     def _time(self):
         if self._choice is None:
@@ -50,13 +59,17 @@ class Problem():
 
         result = ProblemResult(self._choice, self.tr_left, self.tr_right, remainingTime)
         result.consequence()
+    
+    @classmethod
+    def get(cls, levelID) -> "Problem":
+        return cls.registry[levelID]
 
-class ProblemResult(Problem):
-    def __init__(self, choice, tr_left, tr_right, remainingTime):
-        self.choice = choice
-        self.tr_left = tr_left
-        self.tr_right = tr_right
-        self.remainingTime = remainingTime
+@dataclass
+class ProblemResult:
+    choice: str
+    tr_left: int
+    tr_right: int
+    remainingTime: float
 
     def consequence(self):
         match self.choice:
@@ -100,12 +113,13 @@ class ProblemResult(Problem):
                 time.sleep(2)
                 print("Not you")
             case _:
-                print("Sorry, didn't g")
+                print("Sorry, didn't get that")
         
     
 
 classic = Problem(
         name="Classic",
+        levelID=1,
         tr_left=3,
         tr_right=1,
         description=(
@@ -115,4 +129,17 @@ classic = Problem(
         ),
         time=10
     )
+fatMan = Problem(
+        name="The Fat Man",
+        levelID="fat",
+        tr_left=3,
+        tr_right=None,
+        description=(
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In non cursus urna.\n"
+            "Ut sed rutrum velit. Vestibulum sit amet gravida urna. Maecenas accumsan justo quis nibh pharetra semper.\n"
+            "Donec turpis nec."
+        ),
+        time=10
+    )
 classic.play()
+fatMan.play()
