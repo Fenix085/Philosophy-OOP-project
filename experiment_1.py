@@ -7,10 +7,13 @@ from dataclasses import dataclass
 from typing import Dict
 
 class People():
-    def __init__(self):
-        pass
-    def isDead(self):
-        return True
+    def __init__(self, name, job, isDead=False):
+        self.name = name
+        self.job = job
+        self.isDead = isDead
+
+    def death(self):
+        self.isDead = True
 
 class Volunteer(People):
     pass
