@@ -4,35 +4,211 @@
 import threading
 import time
 from dataclasses import dataclass
-from typing import Dict
+from typing import Dict, Type
+from abc import ABC, abstractmethod
+import random
 
-class People():
-    def __init__(self, name, job, isDead=False):
+class Person():
+    def __init__(self, name, job):
         self.name = name
         self.job = job
-        self.isDead = isDead
+        self.isDead = False
 
     def death(self):
         self.isDead = True
 
-class Volunteer(People):
+class Volunteer(Person):
     pass
 
-class Passenger(People):
+class Passenger(Person):
     pass
 
 class Tram():
     def __init__(self):
         pass
 
+@dataclass
+class ProblemResult:
+    choice: str
+    tr_left: int
+    tr_right: int
+    passengers: int
+    remainingTime: float
+
+class Consequence(ABC):
+    def __init__(self, result: ProblemResult):
+        self.result = result
+
+    @abstractmethod
+    def consequence(self):
+        pass
+
+class ClassicConsequence(Consequence):
+
+    _synonims = {
+        "pull": ["pull", "pull the lever"],
+        "not pull": ["not pull", "not", "not pull the lever"],
+        "run": ["run", "run away"]
+    }
+
+    def consequence(self):
+        syn_found = None
+        for syn, synonyms in self._synonims.items():
+            if self.result.choice in synonyms:
+                syn_found = syn
+                break
+
+        if syn_found is None:
+            print("Sorry, didn't get that")
+            syn_found = "not pull"
+
+        mapping = {
+            "pull": self._pull,
+            "not pull": self._notPull,
+            "run": self._run
+        }
+        mapping[syn_found]()
+
+    def _pull(self):
+        if 0 < self.result.remainingTime < 3:
+            print("You have pulled the lever exactly between front and back wheels")
+            time.sleep(2)
+            print("The tram has fallent on its side")
+            time.sleep(2)
+            print("Killing all 'valunteers' and passengers")
+        else:
+            print("You have pulled the lever")
+            time.sleep(2)
+            print("The tram has changed its route")
+            time.sleep(2)
+            print("The tram has killed", self.result.tr_right, "valunteers")
+
+    def _notPull(self):
+        print("You desided not to pull the lever")
+        time.sleep(2)
+        print("The tram has not changed its route")
+        time.sleep(2)
+        print("The tram has killed", self.result.tr_left, "valunteers")
+
+    def _run(self):
+        print("You decided to run away")
+        time.sleep(2)
+        print("The tram has not changed its route")
+        time.sleep(2)
+        print(self.result.tr_left, "valunteers still died")
+        time.sleep(2)
+        print("But you got scared and ran away")
+        time.sleep(2)
+        print("It's ok")
+        time.sleep(2)
+        print("You are not a bad person")
+        time.sleep(2)
+        print("It's not your fault")
+        time.sleep(2)
+        print("You are not responsible for the deaths of", self.result.tr_left,"valunteers")
+        time.sleep(2)
+        print("It's some psycho that tied them to the rails")
+        time.sleep(2)
+        print("Not you")
+
+class FatManConsequence(Consequence):
+
+    _synonims = {
+        "pull": ["pull", "pull the lever"],
+        "not pull": ["not pull", "not", "not pull the lever"],
+        "run": ["run", "run away"],
+        "push": ["push"],
+        "not push": ["not push", "not"],
+    }
+
+    def consequence(self):
+        syn_found = None
+        for syn, synonyms in self._synonims.items():
+            if self.result.choice in synonyms:
+                syn_found = syn
+                break
+
+        if syn_found is None:
+            print("Sorry, didn't get that")
+            syn_found = "not push"
+
+        mapping = {
+            "run": self._run,
+            "push": self._push,
+            "not push": self._notPush
+        }
+        mapping[syn_found]()
+        
+    def _run(self):
+        print("You decided to run away")
+        time.sleep(2)
+        print("The tram is not going to stop")
+        time.sleep(2)
+        print("The tram is going right to kill all those people")
+        time.sleep(2)
+        if random.random() < 0.9:
+            print("The guy next to also got scared")
+            time.sleep(2)
+            print("He just stayed there in shock")
+            #bla bla bla
+
+        else:
+            print("Oh wait")
+            time.sleep(1)
+            print("The guy next to decided to stop the tram")
+            time.sleep(0.75)
+            print("He jumps in front of the tram")
+            time.sleep(0.75)
+            print("He is so fat that he stopped the tram!")
+            time.sleep(2)
+            print("All", self.result.tr_left, "valunteers are saved thanks to him")
+            time.sleep(2)
+            print("But unfortunately")
+            time.sleep(2)
+            print("The day hasn't beed without a loss")
+            time.sleep(2)
+            print("The guy died on the spot")
+            time.sleep(2)
+            print("But he will be remembered as a hero")
+
+    def _push(self):
+        print("You decided to push the guy in front of the tram")
+        time.sleep(2)
+        print("The tram hits him and stops")
+        time.sleep(2)
+        print("All", self.result.tr_left, "valunteers are saved thanks to his absolutely own decision to sacrifice himself")
+        time.sleep(2)
+        print("But because the tram was going so fast")
+        time.sleep(0.75)
+        print("And it stopped so suddenly")
+        time.sleep(0.75)
+        print("Passengers also had a hard time surviving")
+        time.sleep(0.75)
+        print("Unfortunately, ", random.randint(1, self.result.passengers), "passengers died")
+        time.sleep(2)
+
+    def _notPush(self):
+        pass #bla bla bla, later
+
+
+
+
+
+CONSEQUENCE_STYLES: Dict[str, Type[Consequence]] = {
+    "classic": ClassicConsequence,
+    "fatMan": FatManConsequence
+ }
+
 class Problem():
     registry: Dict[str, "Problem"] = {}
 
-    def __init__(self, name, levelID, tr_left, tr_right, description=None, time = 10):
+    def __init__(self, *,name, levelID, style, tr_left, tr_right = 0, passengers, description=None, time = 10):
         self.name = name
         self.levelID = str(levelID)
+        self.style = style
         self.tr_left = tr_left
         self.tr_right = tr_right
+        self.passengers = passengers
         self.description = description
         self.time = time
         self._timer = None
@@ -49,7 +225,10 @@ class Problem():
             self._choice = "not pull"
 
     def play(self):
+        print("You are playing", self.name)
+        print()
         print(self.description)
+        print()
 
         self._startTime = time.monotonic()
         self._timer = threading.Timer(self.time, self._time)
@@ -60,69 +239,20 @@ class Problem():
         endTime = time.monotonic() - self._startTime
         remainingTime = self.time - endTime
 
-        result = ProblemResult(self._choice, self.tr_left, self.tr_right, remainingTime)
-        result.consequence()
+        result = ProblemResult(self._choice, self.tr_left, self.tr_right, self.passengers, remainingTime)
+
+        chosenCls = CONSEQUENCE_STYLES[self.style]
+        chosenCls(result).consequence()
     
     @classmethod
     def get(cls, levelID) -> "Problem":
         return cls.registry[levelID]
 
-@dataclass
-class ProblemResult:
-    choice: str
-    tr_left: int
-    tr_right: int
-    remainingTime: float
-
-    def consequence(self):
-        match self.choice:
-            case "pull":
-                if 0 < self.remainingTime < 3:
-                    print("You have pulled the lever exactly between front and back wheels")
-                    time.sleep(2)
-                    print("The tram has fallent on its side")
-                    time.sleep(2)
-                    print('Killing all "valunteers" and passengers')
-                else:
-                    print("You have pulled the lever")
-                    time.sleep(2)
-                    print("The tram has changed its route")
-                    time.sleep(2)
-                    print("The tram has killed", self.tr_right, "valunteers")
-            case "not pull" | "not":
-                print("You desided not to pull the lever")
-                time.sleep(2)
-                print("The tram has not changed its route")
-                time.sleep(2)
-                print("The tram has killed", self.tr_left, "valunteers")
-            case "run" | "run away":
-                print("You decided to run away")
-                time.sleep(2)
-                print("The tram has not changed its route")
-                time.sleep(2)
-                print(self.tr_left, "valunteers still died")
-                time.sleep(2)
-                print("But you got scared and ran away")
-                time.sleep(2)
-                print("It's ok")
-                time.sleep(2)
-                print("You are not a bad person")
-                time.sleep(2)
-                print("It's not your fault")
-                time.sleep(2)
-                print("You are not responsible for the deaths of", self.tr_left,"valunteers")
-                time.sleep(2)
-                print("It's some psycho that tied them to the rails")
-                time.sleep(2)
-                print("Not you")
-            case _:
-                print("Sorry, didn't get that")
-        
-    
-
 classic = Problem(
         name="Classic",
         levelID=1,
+        style="classic",
+        passengers=5,
         tr_left=3,
         tr_right=1,
         description=(
@@ -135,6 +265,8 @@ classic = Problem(
 fatMan = Problem(
         name="The Fat Man",
         levelID="fat",
+        style="fatMan",
+        passengers=5,
         tr_left=3,
         tr_right=None,
         description=(
@@ -144,5 +276,6 @@ fatMan = Problem(
         ),
         time=10
     )
+
 classic.play()
 fatMan.play()
