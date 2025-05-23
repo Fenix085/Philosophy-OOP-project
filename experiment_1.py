@@ -9,8 +9,15 @@ from abc import ABC, abstractmethod
 import random
 
 class Person():
-    def __init__(self, name, job):
+    _nameList = ["John", "Rowland", "Vivian", "Alfred", "Martha", "Dick", "George", "Gustaw", "Iwona", "Katarzyna", "Peter", "Amanda", "Carmen", "Ola"]
+    _surnameList = ["Wong", "Smith", "Johnson", "Brown", "Weiß", "Müller", "Frank", "Tomczak", "Kowalski", "Wolf", "Russell", "Sturm", "Heintze", "Bower"]
+    _ageList = [i for i in range(26, 65)]
+    _jobList = ["Wildlife rehabilitator", "Data analyst", "Drone operator", "Sommelier", "Solar panel installer", "UX writer", "Stunt coordinator", "Urban beekeeper", "Voice-over artist", "Culinary scientist", "Genetic counselor", "Museum registrar", "Bicycle courier", "Sound engineer", "Comedy scriptwriter", "Ethical hacker", "Toy designer", "Hydrologist", "Yoga therapist", "E-sports coach"]
+
+    def __init__(self, name, surname, age, job):
         self.name = name
+        self.surname = surname
+        self.age = age
         self.job = job
         self.isDead = False
 
@@ -18,10 +25,25 @@ class Person():
         self.isDead = True
 
 class Volunteer(Person):
-    pass
+    @classmethod
+    def generate(cls):
+        name = random.choice(cls._nameList)
+        surname = random.choice(cls._surnameList)
+        age = random.choice(cls._ageList)
+        job = random.choice(cls._jobList)
+        return cls(name, surname, age, job)
 
 class Passenger(Person):
-    pass
+    @classmethod
+    def generate(self):
+        name = random.choice(self._nameList)
+        surname = random.choice(self._surnameList)
+        age = random.choice(self._ageList)
+        job = random.choice(self._jobList)
+        return self(name, surname, age, job)
+    
+def generatePeople(n, cls):
+    return [cls.generate() for _ in range(n)]
 
 class Tram():
     def __init__(self):
@@ -31,8 +53,11 @@ class Tram():
 class ProblemResult:
     choice: str
     tr_left: int
+    leftTrack: list
     tr_right: int
-    passengers: int
+    rightTrack: list
+    numbOfPsngrs: int
+    passengers: list
     remainingTime: float
 
 class Consequence(ABC):
@@ -76,12 +101,21 @@ class ClassicConsequence(Consequence):
             print("The tram has fallent on its side")
             time.sleep(2)
             print("Killing all 'valunteers' and passengers")
+            for person in self.result.leftTrack:
+                person.death()
+            for person in self.result.rightTrack:
+                person.death()
+            for person in self.result.passengers:
+                person.death()
         else:
             print("You have pulled the lever")
             time.sleep(2)
             print("The tram has changed its route")
             time.sleep(2)
             print("The tram has killed", self.result.tr_right, "valunteers")
+            for person in self.result.leftTrack:
+                person.death()
+            
 
     def _notPull(self):
         print("You desided not to pull the lever")
@@ -89,6 +123,8 @@ class ClassicConsequence(Consequence):
         print("The tram has not changed its route")
         time.sleep(2)
         print("The tram has killed", self.result.tr_left, "valunteers")
+        for person in self.result.leftTrack:
+            person.death()
 
     def _run(self):
         print("You decided to run away")
@@ -96,6 +132,8 @@ class ClassicConsequence(Consequence):
         print("The tram has not changed its route")
         time.sleep(2)
         print(self.result.tr_left, "valunteers still died")
+        for person in self.result.leftTrack:
+            person.death()
         time.sleep(2)
         print("But you got scared and ran away")
         time.sleep(2)
@@ -115,11 +153,13 @@ class FatManConsequence(Consequence):
 
     _synonims = {
         "pull": ["pull", "pull the lever"],
-        "not pull": ["not pull", "not", "not pull the lever"],
+        "not pull": ["not pull", "not pull the lever"],
         "run": ["run", "run away"],
         "push": ["push"],
         "not push": ["not push", "not"],
     }
+
+    fatGuy = Person("Fat", "Guy", 45, "Fat Guy")
 
     def consequence(self):
         syn_found = None
@@ -151,7 +191,8 @@ class FatManConsequence(Consequence):
             time.sleep(2)
             print("He just stayed there in shock")
             #bla bla bla
-
+            for person in self.result.leftTrack:
+                person.death()
         else:
             print("Oh wait")
             time.sleep(1)
@@ -168,6 +209,7 @@ class FatManConsequence(Consequence):
             print("The day hasn't beed without a loss")
             time.sleep(2)
             print("The guy died on the spot")
+            self.fatGuy.death()
             time.sleep(2)
             print("But he will be remembered as a hero")
 
@@ -177,6 +219,8 @@ class FatManConsequence(Consequence):
         print("The tram hits him and stops")
         time.sleep(2)
         print("All", self.result.tr_left, "valunteers are saved thanks to his absolutely own decision to sacrifice himself")
+        for person in self.result.leftTrack:
+            person.death()
         time.sleep(2)
         print("But because the tram was going so fast")
         time.sleep(0.75)
@@ -184,11 +228,19 @@ class FatManConsequence(Consequence):
         time.sleep(0.75)
         print("Passengers also had a hard time surviving")
         time.sleep(0.75)
-        print("Unfortunately, ", random.randint(1, self.result.passengers), "passengers died")
+        randnumb = random.randint(1, self.result.numbOfPsngrs)
+        print("Unfortunately, ",randnumb , "passengers died")
+        i = 0
+        while i < randnumb:
+            self.result.passengers[i].death()
+            i += 1
+        
         time.sleep(2)
 
     def _notPush(self):
-        pass #bla bla bla, later
+        print("you have not pushed the guy") #bla bla bla, later !!!!!!DO NOT FORGET!!!!!!
+        for person in self.result.leftTrack:
+            person.death()
 
 
 
@@ -202,17 +254,20 @@ CONSEQUENCE_STYLES: Dict[str, Type[Consequence]] = {
 class Problem():
     registry: Dict[str, "Problem"] = {}
 
-    def __init__(self, *,name, levelID, style, tr_left, tr_right = 0, passengers, description=None, time = 10):
+    def __init__(self, *,name, levelID, style, tr_left, tr_right = 0, numbOfPsngrs, description=None, time = 10):
         self.name = name
         self.levelID = str(levelID)
         self.style = style
         self.tr_left = tr_left
         self.tr_right = tr_right
-        self.passengers = passengers
+        self.numbOfPsngrs = numbOfPsngrs
         self.description = description
         self.time = time
         self._timer = None
         self._choice = None
+        self.leftTrack = (generatePeople(self.tr_left, Volunteer))
+        self.rightTrack = (generatePeople(self.tr_right, Volunteer))
+        self.passengers = (generatePeople(self.passengers, Passenger))
 
         if self.levelID in Problem.registry:
             raise ValueError("Duplicate levelID", self.levelID)
@@ -239,7 +294,7 @@ class Problem():
         endTime = time.monotonic() - self._startTime
         remainingTime = self.time - endTime
 
-        result = ProblemResult(self._choice, self.tr_left, self.tr_right, self.passengers, remainingTime)
+        result = ProblemResult(self._choice, self.tr_left, self.leftTrack, self.tr_right, self.rightTrack, self.numbOfPsngrs, self.passengers, remainingTime)
 
         chosenCls = CONSEQUENCE_STYLES[self.style]
         chosenCls(result).consequence()
@@ -252,7 +307,7 @@ classic = Problem(
         name="Classic",
         levelID=1,
         style="classic",
-        passengers=5,
+        numbOfPsngrs=5,
         tr_left=3,
         tr_right=1,
         description=(
@@ -266,7 +321,7 @@ fatMan = Problem(
         name="The Fat Man",
         levelID="fat",
         style="fatMan",
-        passengers=5,
+        numbOfPsngrs=5,
         tr_left=3,
         tr_right=None,
         description=(
