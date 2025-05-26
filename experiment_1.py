@@ -267,7 +267,7 @@ class Problem():
         self._choice = None
         self.leftTrack = (generatePeople(self.tr_left, Volunteer))
         self.rightTrack = (generatePeople(self.tr_right, Volunteer))
-        self.passengers = (generatePeople(self.passengers, Passenger))
+        self.passengers = (generatePeople(self.numbOfPsngrs, Passenger))
 
         if self.levelID in Problem.registry:
             raise ValueError("Duplicate levelID", self.levelID)
@@ -323,7 +323,7 @@ fatMan = Problem(
         style="fatMan",
         numbOfPsngrs=5,
         tr_left=3,
-        tr_right=None,
+        tr_right=0,
         description=(
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In non cursus urna.\n"
             "Ut sed rutrum velit. Vestibulum sit amet gravida urna. Maecenas accumsan justo quis nibh pharetra semper.\n"
