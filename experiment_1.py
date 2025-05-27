@@ -49,10 +49,48 @@ class Tram():
     def __init__(self):
         pass
 #--------------------------------------------
+@dataclass
+class ProblemResult:
+    choice: str
+    tr_left: int
+    leftTrack: list
+    tr_right: int
+    rightTrack: list
+    numbOfPsngrs: int
+    passengers: list
+    remainingTime: float
+#--------------------------------------------
+class EpilogueWriter():
+    def __init__(self, result: ProblemResult):
+        self.result = result
+    
+    def write(self):
+        cntr = 0
+        for person in self.result.leftTrack + self.result.rightTrack + self.result.passengers:
+            if person.isDead == True:
+                print(f"{person.name} {person.surname} ({person.age}, {person.job}) died in result of you actions")
+                time.sleep(1)
+                cntr += 1
+        if cntr == 0:
+            print("No one died in result of your actions")
+            time.sleep(1)
+            return
+        cntr = 0
+        print("But")
+        for person in self.result.leftTrack + self.result.rightTrack + self.result.passengers:
+            if person.isDead == False:
+                print(f"{person.name} {person.surname} ({person.age}, {person.job}) survived and can come back to their families")
+                time.sleep(1)
+                cntr += 1
+        if cntr == 0:
+            print("No one survived in result of your actions")
+            time.sleep(1)
+            return
+#--------------------------------------------
 class Problem():
     registry: Dict[str, "Problem"] = {}
 
-    def __init__(self, *,name, levelID, style, tr_left, tr_right = 0, numbOfPsngrs, description=None, time = 10):
+    def __init__(self, *,name, levelID, style, tr_left, tr_right = 0, numbOfPsngrs, description=None, time = 10, writer_cls=EpilogueWriter):
         self.name = name
         self.levelID = str(levelID)
         self.style = style
@@ -66,6 +104,7 @@ class Problem():
         self.leftTrack = (generatePeople(self.tr_left, Volunteer))
         self.rightTrack = (generatePeople(self.tr_right, Volunteer))
         self.passengers = (generatePeople(self.numbOfPsngrs, Passenger))
+        self.writer_cls = writer_cls
 
         if self.levelID in Problem.registry:
             raise ValueError("Duplicate levelID", self.levelID)
@@ -96,21 +135,14 @@ class Problem():
 
         chosenCls = CONSEQUENCE_STYLES[self.style]
         chosenCls(result).consequence()
+
+        self.writer_cls(result).write() 
     
     @classmethod
     def get(cls, levelID) -> "Problem":
         return cls.registry[levelID]
 #--------------------------------------------
-@dataclass
-class ProblemResult:
-    choice: str
-    tr_left: int
-    leftTrack: list
-    tr_right: int
-    rightTrack: list
-    numbOfPsngrs: int
-    passengers: list
-    remainingTime: float
+
 
 class Consequence(ABC):
     def __init__(self, result: ProblemResult):
@@ -165,7 +197,7 @@ class ClassicConsequence(Consequence):
             print("The tram has changed its route")
             time.sleep(2)
             print("The tram has killed", self.result.tr_right, "valunteers")
-            for person in self.result.leftTrack:
+            for person in self.result.rightTrack:
                 person.death()
             
 
