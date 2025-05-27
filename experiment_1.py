@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from typing import Dict, Type
 from abc import ABC, abstractmethod
 import random
-
+#---------------------------------------------
 class Person():
     _nameList = ["John", "Rowland", "Vivian", "Alfred", "Martha", "Dick", "George", "Gustaw", "Iwona", "Katarzyna", "Peter", "Amanda", "Carmen", "Ola"]
     _surnameList = ["Wong", "Smith", "Johnson", "Brown", "Weiß", "Müller", "Frank", "Tomczak", "Kowalski", "Wolf", "Russell", "Sturm", "Heintze", "Bower"]
@@ -48,7 +48,59 @@ def generatePeople(n, cls):
 class Tram():
     def __init__(self):
         pass
+#--------------------------------------------
+class Problem():
+    registry: Dict[str, "Problem"] = {}
 
+    def __init__(self, *,name, levelID, style, tr_left, tr_right = 0, numbOfPsngrs, description=None, time = 10):
+        self.name = name
+        self.levelID = str(levelID)
+        self.style = style
+        self.tr_left = tr_left
+        self.tr_right = tr_right
+        self.numbOfPsngrs = numbOfPsngrs
+        self.description = description
+        self.time = time
+        self._timer = None
+        self._choice = None
+        self.leftTrack = (generatePeople(self.tr_left, Volunteer))
+        self.rightTrack = (generatePeople(self.tr_right, Volunteer))
+        self.passengers = (generatePeople(self.numbOfPsngrs, Passenger))
+
+        if self.levelID in Problem.registry:
+            raise ValueError("Duplicate levelID", self.levelID)
+        Problem.registry[self.levelID] = self
+
+    def _time(self):
+        if self._choice is None:
+            print("You were thinking for too long")
+            print("The tram has already passed the lever")
+            self._choice = "not pull"
+
+    def play(self):
+        print("You are playing", self.name)
+        print()
+        print(self.description)
+        print()
+
+        self._startTime = time.monotonic()
+        self._timer = threading.Timer(self.time, self._time)
+        self._timer.start()
+
+        self._choice = input("What will you do? Pull or not pull or ...? ").strip().lower()
+        self._timer.cancel()
+        endTime = time.monotonic() - self._startTime
+        remainingTime = self.time - endTime
+
+        result = ProblemResult(self._choice, self.tr_left, self.leftTrack, self.tr_right, self.rightTrack, self.numbOfPsngrs, self.passengers, remainingTime)
+
+        chosenCls = CONSEQUENCE_STYLES[self.style]
+        chosenCls(result).consequence()
+    
+    @classmethod
+    def get(cls, levelID) -> "Problem":
+        return cls.registry[levelID]
+#--------------------------------------------
 @dataclass
 class ProblemResult:
     choice: str
@@ -242,67 +294,11 @@ class FatManConsequence(Consequence):
         for person in self.result.leftTrack:
             person.death()
 
-
-
-
-
 CONSEQUENCE_STYLES: Dict[str, Type[Consequence]] = {
     "classic": ClassicConsequence,
     "fatMan": FatManConsequence
  }
-
-class Problem():
-    registry: Dict[str, "Problem"] = {}
-
-    def __init__(self, *,name, levelID, style, tr_left, tr_right = 0, numbOfPsngrs, description=None, time = 10):
-        self.name = name
-        self.levelID = str(levelID)
-        self.style = style
-        self.tr_left = tr_left
-        self.tr_right = tr_right
-        self.numbOfPsngrs = numbOfPsngrs
-        self.description = description
-        self.time = time
-        self._timer = None
-        self._choice = None
-        self.leftTrack = (generatePeople(self.tr_left, Volunteer))
-        self.rightTrack = (generatePeople(self.tr_right, Volunteer))
-        self.passengers = (generatePeople(self.numbOfPsngrs, Passenger))
-
-        if self.levelID in Problem.registry:
-            raise ValueError("Duplicate levelID", self.levelID)
-        Problem.registry[self.levelID] = self
-
-    def _time(self):
-        if self._choice is None:
-            print("You were thinking for too long")
-            print("The tram has already passed the lever")
-            self._choice = "not pull"
-
-    def play(self):
-        print("You are playing", self.name)
-        print()
-        print(self.description)
-        print()
-
-        self._startTime = time.monotonic()
-        self._timer = threading.Timer(self.time, self._time)
-        self._timer.start()
-
-        self._choice = input("What will you do? Pull or not pull or ...? ").strip().lower()
-        self._timer.cancel()
-        endTime = time.monotonic() - self._startTime
-        remainingTime = self.time - endTime
-
-        result = ProblemResult(self._choice, self.tr_left, self.leftTrack, self.tr_right, self.rightTrack, self.numbOfPsngrs, self.passengers, remainingTime)
-
-        chosenCls = CONSEQUENCE_STYLES[self.style]
-        chosenCls(result).consequence()
-    
-    @classmethod
-    def get(cls, levelID) -> "Problem":
-        return cls.registry[levelID]
-
+#--------------------------------------------
 classic = Problem(
         name="Classic",
         levelID=1,
