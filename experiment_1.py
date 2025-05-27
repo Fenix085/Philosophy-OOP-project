@@ -24,7 +24,6 @@ class Person():
     def death(self):
         self.isDead = True
 
-class Volunteer(Person):
     @classmethod
     def generate(cls):
         name = random.choice(cls._nameList)
@@ -33,21 +32,18 @@ class Volunteer(Person):
         job = random.choice(cls._jobList)
         return cls(name, surname, age, job)
 
+class Volunteer(Person):
+    pass
+
 class Passenger(Person):
-    @classmethod
-    def generate(self):
-        name = random.choice(self._nameList)
-        surname = random.choice(self._surnameList)
-        age = random.choice(self._ageList)
-        job = random.choice(self._jobList)
-        return self(name, surname, age, job)
+    pass
     
 def generatePeople(n, cls):
     return [cls.generate() for _ in range(n)]
 
-class Tram():
-    def __init__(self):
-        pass
+# class Tram():
+#     def __init__(self):
+#         pass
 #--------------------------------------------
 @dataclass
 class ProblemResult:
