@@ -313,5 +313,6 @@ fatMan = Problem(
         time=10
     )
 
-classic.play()
-fatMan.play()
+if __name__ == "__main__":
+    classic.play()
+    fatMan.play()
