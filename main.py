@@ -261,8 +261,6 @@ class FatManConsequence(Consequence):
         scribe_expecta("You decided to push the guy in front of the tram", 2)
         scribe_expecta("The tram hits him and stops", 2)
         scribe_expecta(f"All {self.result.tr_left} valunteers are saved thanks to his absolutely own decision to sacrifice himself", 2)
-        for person in self.result.leftTrack:
-            person.death()
         scribe_expecta("But because the tram was going so fast", 0.75)
         scribe_expecta("And it stopped so suddenly", 0.75)
         scribe_expecta("Passengers also had a hard time surviving", 0.75)
