@@ -138,6 +138,10 @@ class Problem():
     def get(cls, levelID) -> "Problem":
         return cls.registry[levelID]
 #--------------------------------------------
+def scribe_expecta(line = "", delay = 0.0):
+    print(line)
+    time.sleep(delay)
+#---------------------------------------------
 
 
 class Consequence(ABC):
@@ -164,7 +168,7 @@ class ClassicConsequence(Consequence):
                 break
 
         if syn_found is None:
-            print("Sorry, didn't get that")
+            scribe_expecta("Sorry, didn't get that")
             syn_found = "not pull"
 
         mapping = {
@@ -176,11 +180,9 @@ class ClassicConsequence(Consequence):
 
     def _pull(self):
         if 0 < self.result.remainingTime < 3:
-            print("You have pulled the lever exactly between front and back wheels")
-            time.sleep(2)
-            print("The tram has fallent on its side")
-            time.sleep(2)
-            print("Killing all 'valunteers' and passengers")
+            scribe_expecta("You have pulled the lever exactly between front and back wheels", 2)
+            scribe_expecta("The tram has fallent on its side", 2)
+            scribe_expecta("Killing all 'valunteers' and passengers")
             for person in self.result.leftTrack:
                 person.death()
             for person in self.result.rightTrack:
@@ -188,46 +190,33 @@ class ClassicConsequence(Consequence):
             for person in self.result.passengers:
                 person.death()
         else:
-            print("You have pulled the lever")
-            time.sleep(2)
-            print("The tram has changed its route")
-            time.sleep(2)
-            print("The tram has killed", self.result.tr_right, "valunteers")
+            scribe_expecta("You have pulled the lever", 2)
+            scribe_expecta("The tram has changed its route", 2)
+            scribe_expecta(f"The tram has killed {self.result.tr_left} valunteers")
             for person in self.result.rightTrack:
                 person.death()
             
 
     def _notPull(self):
-        print("You desided not to pull the lever")
-        time.sleep(2)
-        print("The tram has not changed its route")
-        time.sleep(2)
-        print("The tram has killed", self.result.tr_left, "valunteers")
+        scribe_expecta("You desided not to pull the lever", 2)
+        scribe_expecta("The tram has not changed its route", 2)
+        scribe_expecta(f"The tram has killed {self.result.tr_left} valunteers")
         for person in self.result.leftTrack:
             person.death()
 
     def _run(self):
-        print("You decided to run away")
-        time.sleep(2)
-        print("The tram has not changed its route")
-        time.sleep(2)
-        print(self.result.tr_left, "valunteers still died")
+        scribe_expecta("You decided to run away", 2)
+        scribe_expecta("The tram has not changed its route", 2)
+        scribe_expecta(f"{self.result.tr_left} valunteers still died", 2)
         for person in self.result.leftTrack:
             person.death()
-        time.sleep(2)
-        print("But you got scared and ran away")
-        time.sleep(2)
-        print("It's ok")
-        time.sleep(2)
-        print("You are not a bad person")
-        time.sleep(2)
-        print("It's not your fault")
-        time.sleep(2)
-        print("You are not responsible for the deaths of", self.result.tr_left,"valunteers")
-        time.sleep(2)
-        print("It's some psycho that tied them to the rails")
-        time.sleep(2)
-        print("Not you")
+        scribe_expecta("But you got scared and ran away", 2)
+        scribe_expecta("It's ok", 2)
+        scribe_expecta("You are not a bad person", 2)
+        scribe_expecta("It's not your fault", 2)
+        scribe_expecta(f"You are not responsible for the deaths of {self.result.tr_left} valunteers", 2)
+        scribe_expecta("It's some psycho that tied them to the rails", 2)
+        scribe_expecta("Not you", 5)
 
 class FatManConsequence(Consequence):
 
@@ -249,7 +238,7 @@ class FatManConsequence(Consequence):
                 break
 
         if syn_found is None:
-            print("Sorry, didn't get that")
+            scribe_expecta("Sorry, didn't get that")
             syn_found = "not push"
 
         mapping = {
@@ -260,65 +249,46 @@ class FatManConsequence(Consequence):
         mapping[syn_found]()
         
     def _run(self):
-        print("You decided to run away")
-        time.sleep(2)
-        print("The tram is not going to stop")
-        time.sleep(2)
-        print("The tram is going right to kill all those people")
-        time.sleep(2)
+        scribe_expecta("You decided to run away", 2)
+        scribe_expecta("The tram is not going to stop", 2)
+        scribe_expecta("The tram is going right to kill all those people", 2)
         if random.random() < 0.9:
-            print("The guy next to also got scared")
-            time.sleep(2)
-            print("He just stayed there in shock")
+            scribe_expecta("The guy next to also got scared", 2)
+            scribe_expecta("He just stayed there in shock", 2)
             #bla bla bla
             for person in self.result.leftTrack:
                 person.death()
         else:
-            print("Oh wait")
-            time.sleep(1)
-            print("The guy next to decided to stop the tram")
-            time.sleep(0.75)
-            print("He jumps in front of the tram")
-            time.sleep(0.75)
-            print("He is so fat that he stopped the tram!")
-            time.sleep(2)
-            print("All", self.result.tr_left, "valunteers are saved thanks to him")
-            time.sleep(2)
-            print("But unfortunately")
-            time.sleep(2)
-            print("The day hasn't beed without a loss")
-            time.sleep(2)
-            print("The guy died on the spot")
+            scribe_expecta("Oh wait", 1)
+            scribe_expecta("The guy next to decided to stop the tram", 0.75)
+            scribe_expecta("He jumps in front of the tram", 0.75)
+            scribe_expecta("He is so fat that he stopped the tram!", 2)
+            scribe_expecta(f"All {self.result.tr_left} valunteers are saved thanks to him", 2)
+            scribe_expecta("But unfortunately", 2)
+            scribe_expecta("The day hasn't beed without a loss", 2)
+            scribe_expecta("The guy died on the spot", 2)
             self.fatGuy.death()
-            time.sleep(2)
-            print("But he will be remembered as a hero")
+            scribe_expecta("But he will be remembered as a hero", 5)
 
     def _push(self):
-        print("You decided to push the guy in front of the tram")
-        time.sleep(2)
-        print("The tram hits him and stops")
-        time.sleep(2)
-        print("All", self.result.tr_left, "valunteers are saved thanks to his absolutely own decision to sacrifice himself")
+        scribe_expecta("You decided to push the guy in front of the tram", 2)
+        scribe_expecta("The tram hits him and stops", 2)
+        scribe_expecta(f"All {self.result.tr_left} valunteers are saved thanks to his absolutely own decision to sacrifice himself", 2)
         for person in self.result.leftTrack:
             person.death()
-        time.sleep(2)
-        print("But because the tram was going so fast")
-        time.sleep(0.75)
-        print("And it stopped so suddenly")
-        time.sleep(0.75)
-        print("Passengers also had a hard time surviving")
-        time.sleep(0.75)
+        scribe_expecta("But because the tram was going so fast", 0.75)
+        scribe_expecta("And it stopped so suddenly", 0.75)
+        scribe_expecta("Passengers also had a hard time surviving", 0.75)
         randnumb = random.randint(1, self.result.numbOfPsngrs)
-        print("Unfortunately, ",randnumb , "passengers died")
+        scribe_expecta(f"Unfortunately, {randnumb} {" passengers " if randnumb != 1 else " passenger "} died")
         i = 0
         while i < randnumb:
             self.result.passengers[i].death()
             i += 1
-        
         time.sleep(2)
 
     def _notPush(self):
-        print("you have not pushed the guy") #bla bla bla, later !!!!!!DO NOT FORGET!!!!!!
+        scribe_expecta("you have not pushed the guy") #bla bla bla, later !!!!!!DO NOT FORGET!!!!!!
         for person in self.result.leftTrack:
             person.death()
 
