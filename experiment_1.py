@@ -131,8 +131,6 @@ def scribe_expecta(line = "", delay = 0.0):
     print(line)
     time.sleep(delay)
 #---------------------------------------------
-
-
 class Consequence(ABC):
     def __init__(self, result: ProblemResult):
         self.result = result
