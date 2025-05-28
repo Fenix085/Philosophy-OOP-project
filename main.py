@@ -179,7 +179,7 @@ class ClassicConsequence(Consequence):
         else:
             scribe_expecta("You have pulled the lever", 2)
             scribe_expecta("The tram has changed its route", 2)
-            scribe_expecta(f"The tram has killed {self.result.tr_left} valunteers")
+            scribe_expecta(f"The tram has killed {self.result.tr_right} valunteers")
             for person in self.result.rightTrack:
                 person.death()
             
