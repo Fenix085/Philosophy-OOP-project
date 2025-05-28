@@ -61,27 +61,12 @@ class EpilogueWriter():
         self.result = result
     
     def write(self):
-        cntr = 0
-        for person in self.result.leftTrack + self.result.rightTrack + self.result.passengers:
+        everyone = self.result.leftTrack + self.result.rightTrack + self.result.passengers
+        for person in everyone:
             if person.isDead == True:
-                print(f"{person.name} {person.surname} ({person.age}, {person.job}) died in result of you actions")
-                time.sleep(1)
-                cntr += 1
-        if cntr == 0:
-            print("No one died in result of your actions")
-            time.sleep(1)
-            return
-        cntr = 0
-        print("But")
-        for person in self.result.leftTrack + self.result.rightTrack + self.result.passengers:
-            if person.isDead == False:
-                print(f"{person.name} {person.surname} ({person.age}, {person.job}) survived and can come back to their families")
-                time.sleep(1)
-                cntr += 1
-        if cntr == 0:
-            print("No one survived in result of your actions")
-            time.sleep(1)
-            return
+                scribe_expecta(f"{person.name} {person.surname} ({person.age}, {person.job}) died in result of your actions", 1.5)
+            else:
+                scribe_expecta(f"{person.name} {person.surname} ({person.age}, {person.job}) survived and can come back to their families", 1.5)
 #--------------------------------------------
 class Problem():
     registry: Dict[str, "Problem"] = {}
