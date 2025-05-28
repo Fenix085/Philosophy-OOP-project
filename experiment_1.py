@@ -59,14 +59,18 @@ class ProblemResult:
 class EpilogueWriter():
     def __init__(self, result: ProblemResult):
         self.result = result
+
+    def _role(self, person):
+        return "Volunteer" if isinstance(person, Volunteer) else "Passenger"
     
     def write(self):
         everyone = self.result.leftTrack + self.result.rightTrack + self.result.passengers
         for person in everyone:
+            role = self._role(person)
             if person.isDead == True:
-                scribe_expecta(f"{person.name} {person.surname} ({person.age}, {person.job}) died in result of your actions", 1.5)
+                scribe_expecta(f"{role} {person.name} {person.surname} ({person.age}, {person.job}) died in result of your actions", 1.5)
             else:
-                scribe_expecta(f"{person.name} {person.surname} ({person.age}, {person.job}) survived and can come back to their families", 1.5)
+                scribe_expecta(f"{role} {person.name} {person.surname} ({person.age}, {person.job}) survived and can come back to their families", 1.5)
 #--------------------------------------------
 class Problem():
     registry: Dict[str, "Problem"] = {}
