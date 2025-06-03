@@ -15,3 +15,9 @@ def test_random_returns_person():
     assert isinstance(p.age, int)
     assert isinstance(p.job, str)
     assert isinstance(p.isDead, bool)
+
+def test_death():
+    p = Person.generate()
+    assert not p.isDead
+    p.death()
+    assert p.isDead
