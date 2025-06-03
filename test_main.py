@@ -10,8 +10,8 @@ def deterministic_random(monkeypatch):
 def test_random_returns_person():
     p = Person.generate()
     assert isinstance(p, Person)
-    assert p.name
-    assert p.surname
-    assert p.age
-    assert p.job
-    assert not p.isDead
+    assert isinstance(p.name, str)
+    assert isinstance(p.surname, str)
+    assert isinstance(p.age, int)
+    assert isinstance(p.job, str)
+    assert isinstance(p.isDead, bool)
