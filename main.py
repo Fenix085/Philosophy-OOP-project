@@ -141,7 +141,7 @@ class Consequence(ABC):
 
 class ClassicConsequence(Consequence):
 
-    _synonims = {
+    _synonyms = {
         "pull": ["pull", "pull the lever"],
         "not pull": ["not pull", "not", "not pull the lever"],
         "run": ["run", "run away"]
@@ -149,7 +149,7 @@ class ClassicConsequence(Consequence):
 
     def consequence(self):
         syn_found = None
-        for syn, synonyms in self._synonims.items():
+        for syn, synonyms in self._synonyms.items():
             if self.result.choice in synonyms:
                 syn_found = syn
                 break
@@ -207,7 +207,7 @@ class ClassicConsequence(Consequence):
 
 class FatManConsequence(Consequence):
 
-    _synonims = {
+    _synonyms = {
         "pull": ["pull", "pull the lever"],
         "not pull": ["not pull", "not pull the lever"],
         "run": ["run", "run away"],
@@ -219,7 +219,7 @@ class FatManConsequence(Consequence):
 
     def consequence(self):
         syn_found = None
-        for syn, synonyms in self._synonims.items():
+        for syn, synonyms in self._synonyms.items():
             if self.result.choice in synonyms:
                 syn_found = syn
                 break
