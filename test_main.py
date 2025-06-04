@@ -21,3 +21,78 @@ def test_death():
     assert not p.isDead
     p.death()
     assert p.isDead
+
+def test_track_generation_counts_and_types_Classic():
+    n_left = 3
+    n_right = 1
+    n_pass = 5
+
+    testProblem = Problem(
+        name="Test Problem",
+        levelID="test1",
+        style="classic",
+        tr_left=n_left,
+        tr_right=n_right,
+        numbOfPsngrs=n_pass,
+        time = 1,
+    )
+    assert len(testProblem.leftTrack) == n_left
+    assert len(testProblem.rightTrack) == n_right
+    assert len(testProblem.passengers) == n_pass
+
+    assert all(isinstance(p, Volunteer) for p in testProblem.leftTrack)
+    assert all(isinstance(p, Volunteer) for p in testProblem.rightTrack)
+    assert all(isinstance(p, Passenger) for p in testProblem.passengers)
+
+    ids = {id(p) for p in (testProblem.leftTrack + testProblem.rightTrack + testProblem.passengers)}
+    assert len(ids) == n_left + n_right + n_pass
+
+def test_track_generation_counts_and_types_AllZero():
+    n_left = 0
+    n_right = 0
+    n_pass = 0
+
+    testProblem = Problem(
+        name="Test Problem",
+        levelID="test2",
+        style="classic",
+        tr_left=n_left,
+        tr_right=n_right,
+        numbOfPsngrs=n_pass,
+        time = 1,
+    )
+    assert len(testProblem.leftTrack) == n_left
+    assert len(testProblem.rightTrack) == n_right
+    assert len(testProblem.passengers) == n_pass
+
+    assert all(isinstance(p, Volunteer) for p in testProblem.leftTrack)
+    assert all(isinstance(p, Volunteer) for p in testProblem.rightTrack)
+    assert all(isinstance(p, Passenger) for p in testProblem.passengers)
+
+    ids = {id(p) for p in (testProblem.leftTrack + testProblem.rightTrack + testProblem.passengers)}
+    assert len(ids) == n_left + n_right + n_pass
+
+def test_track_generation_counts_and_types_BigNumbers():
+    n_left = 300
+    n_right = 1
+    n_pass = 5000
+
+    testProblem = Problem(
+        name="Test Problem",
+        levelID="test3",
+        style="classic",
+        tr_left=n_left,
+        tr_right=n_right,
+        numbOfPsngrs=n_pass,
+        time = 1,
+    )
+    assert len(testProblem.leftTrack) == n_left
+    assert len(testProblem.rightTrack) == n_right
+    assert len(testProblem.passengers) == n_pass
+
+    assert all(isinstance(p, Volunteer) for p in testProblem.leftTrack)
+    assert all(isinstance(p, Volunteer) for p in testProblem.rightTrack)
+    assert all(isinstance(p, Passenger) for p in testProblem.passengers)
+
+    ids = {id(p) for p in (testProblem.leftTrack + testProblem.rightTrack + testProblem.passengers)}
+    assert len(ids) == n_left + n_right + n_pass
