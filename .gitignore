@@ -1,4 +1,4 @@
 /pycache/
 /.pytest_cache
 
-__pycache__/test_main.cpython-313-pytest-8.3.5.pyc
+/__pycache__/

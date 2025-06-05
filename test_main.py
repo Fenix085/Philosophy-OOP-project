@@ -96,3 +96,30 @@ def test_track_generation_counts_and_types_BigNumbers():
 
     ids = {id(p) for p in (testProblem.leftTrack + testProblem.rightTrack + testProblem.passengers)}
     assert len(ids) == n_left + n_right + n_pass
+
+@pytest.mark.parametrize("user_input,expected_method", [
+        ("pull", "_pull"),
+        ("pull the lever", "_pull"),
+        ("not pull", "_notPull"),
+        ("not pull the lever", "_notPull"),
+        ("not", "_notPull"),
+        ("run", "_run"),
+        ("run away", "_run"),
+    ])
+def test_classic_synonyms_consequence(user_input, expected_method, capfd):
+        result = ProblemResult(
+            choice=user_input,
+            tr_left=0, leftTrack=[],
+            tr_right=0, rightTrack=[],
+            numbOfPsngrs=0, passengers=[],
+            remainingTime=5
+        )
+        c = ClassicConsequence(result)
+        c.consequence()
+        output = capfd.readouterr().out
+        if expected_method == "_pull":
+            assert ("You have pulled the lever" in output)
+        elif expected_method == "_notPull":
+            assert "You desided not to pull the lever" in output
+        else:
+            assert "You decided to run away" in output
